@@ -6,6 +6,7 @@
 //  Copyright © 2021 Paul Hudson. All rights reserved.
 //
 
+#if os(iOS)
 import AVFoundation
 import SwiftUI
 
@@ -34,6 +35,12 @@ public struct ScanResult {
 
     /// The type of code that was matched.
     public let type: AVMetadataObject.ObjectType
+    
+    /// The image of the code that was matched
+    public let image: UIImage?
+  
+    /// The corner coordinates of the scanned code.
+    public let corners: [CGPoint]
 }
 
 /// The operating mode for CodeScannerView.
@@ -47,8 +54,20 @@ public enum ScanMode {
     /// Keep scanning all codes until dismissed.
     case continuous
 
+    /// Keep scanning all codes - except the ones from the ignored list - until dismissed.
+    case continuousExcept(ignoredList: Set<String>)
+
     /// Scan only when capture button is tapped.
     case manual
+
+    var isManual: Bool {
+        switch self {
+        case .manual:
+            return true
+        case .once, .oncePerCode, .continuous, .continuousExcept:
+            return false
+        }
+    }
 }
 
 /// A SwiftUI view that is able to scan barcodes, QR codes, and more, and send back what was found.
@@ -63,9 +82,11 @@ public struct CodeScannerView: UIViewControllerRepresentable {
     public let manualSelect: Bool
     public let scanInterval: Double
     public let showViewfinder: Bool
+    public let requiresPhotoOutput: Bool
     public var simulatedData = ""
     public var shouldVibrateOnSuccess: Bool
     public var isTorchOn: Bool
+    public var isPaused: Bool
     public var isGalleryPresented: Binding<Bool>
     public var videoCaptureDevice: AVCaptureDevice?
     public var completion: (Result<ScanResult, ScanError>) -> Void
@@ -76,21 +97,25 @@ public struct CodeScannerView: UIViewControllerRepresentable {
         manualSelect: Bool = false,
         scanInterval: Double = 2.0,
         showViewfinder: Bool = false,
+        requiresPhotoOutput: Bool = true,
         simulatedData: String = "",
         shouldVibrateOnSuccess: Bool = true,
         isTorchOn: Bool = false,
+        isPaused: Bool = false,
         isGalleryPresented: Binding<Bool> = .constant(false),
-        videoCaptureDevice: AVCaptureDevice? = AVCaptureDevice.default(for: .video),
+        videoCaptureDevice: AVCaptureDevice? = AVCaptureDevice.bestForVideo,
         completion: @escaping (Result<ScanResult, ScanError>) -> Void
     ) {
         self.codeTypes = codeTypes
         self.scanMode = scanMode
         self.manualSelect = manualSelect
         self.showViewfinder = showViewfinder
+        self.requiresPhotoOutput = requiresPhotoOutput
         self.scanInterval = scanInterval
         self.simulatedData = simulatedData
         self.shouldVibrateOnSuccess = shouldVibrateOnSuccess
         self.isTorchOn = isTorchOn
+        self.isPaused = isPaused
         self.isGalleryPresented = isGalleryPresented
         self.videoCaptureDevice = videoCaptureDevice
         self.completion = completion
@@ -105,11 +130,20 @@ public struct CodeScannerView: UIViewControllerRepresentable {
         uiViewController.updateViewController(
             isTorchOn: isTorchOn,
             isGalleryPresented: isGalleryPresented.wrappedValue,
-            isManualCapture: scanMode == .manual,
+            isManualCapture: scanMode.isManual,
             isManualSelect: manualSelect
         )
     }
     
+}
+
+@available(macCatalyst 14.0, *)
+extension CodeScannerView {
+
+    @available(*, deprecated, renamed: "requiresPhotoOutput")
+    public var requirePhotoOutput: Bool {
+        requiresPhotoOutput
+    }
 }
 
 @available(macCatalyst 14.0, *)
@@ -120,3 +154,4 @@ struct CodeScannerView_Previews: PreviewProvider {
         }
     }
 }
+#endif

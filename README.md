@@ -31,10 +31,11 @@ If things go wrong, your result will contain a `ScanError` set to one of these t
 You can provide a variety of extra customization options to `CodeScannerView` in its initializer:
 
 - `scanMode` can be `.once` to scan a single code, `.oncePerCode` to scan many codes but only trigger finding each unique code once, and `.continuous` will keep finding codes until you dismiss the scanner. Default: `.once`.
-- `scanInterval` controls how fast individual codes should be scanned when running in `.continuous` scan mode.
+- `scanInterval` controls how fast individual codes should be scanned (in seconds) when running in `.continuous` scan mode.
 - `showViewfinder` determines whether to show a box-like viewfinder over the UI. Default: false.
 - `simulatedData` allows you to provide some test data to use in Simulator, when real scanning isn’t available. Default: an empty string.
 - `shouldVibrateOnSuccess` allows you to determine whether device should vibrate when a code is found. Default: true.
+- `videoCaptureDevice` allows you to choose different capture device that is most suitable for code to scan. 
 
 If you want to add UI customization, such as a dedicated Cancel button, you should wrap your `CodeScannerView` instance in a `NavigationView` and use a `toolbar()` modifier to add whatever buttons you want.
 
@@ -87,10 +88,28 @@ struct QRCodeScannerExampleView: View {
 }
 ```
 
+## Scanning small QR codes
+
+Scanning small QR code on devices with dual or tripple cameras has to be adjusted because of minimum focus distance built in these cameras.
+To have the best possible focus on the code we scan it is needed to choose the most suitable camera and apply recommended zoom factor.
+
+Example for scanning 20x20mm QR codes.
+
+```swift
+CodeScannerView(codeTypes: [.qr], videoCaptureDevice: AVCaptureDevice.zoomedCameraForQRCode(withMinimumCodeSize: 20)) { response in                    
+    switch response {
+    case .success(let result):
+        print("Found code: \(result.string)")
+    case .failure(let error):
+        print(error.localizedDescription)
+    }
+}
+```
+
 
 ## Credits
 
-CodeScanner was made by [Paul Hudson](https://twitter.com/twostraws), who writes [free Swift tutorials over at Hacking with Swift](https://www.hackingwithswift.com). It’s available under the MIT license, which permits commercial use, modification, distribution, and private use.
+CodeScanner was made by [Paul Hudson](https://twitter.com/twostraws), who writes [free Swift tutorials over at Hacking with Swift](https://www.hackingwithswift.com), and is now maintained by [Nathan Fallet](https://nathanfallet.me). It’s available under the MIT license, which permits commercial use, modification, distribution, and private use.
 
 
 ## License
