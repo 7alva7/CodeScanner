@@ -10,7 +10,7 @@
 
 CodeScanner is a SwiftUI framework that makes it easy to scan codes such as QR codes and barcodes. It provides a view struct, `CodeScannerView`, that can be shown inside a sheet so that all scanning occurs in one place.
 
-> Looking for a Compose Multiplaform libray? We also built it! [Discover the Compose Multiplatform CodeScanner library](https://github.com/guimauvedigital/codescanner)
+> Looking for a Compose Multiplatform library? We also built it! [Discover the Compose Multiplatform CodeScanner library](https://github.com/guimauvedigital/codescanner)
 
 ## Basic usage
 
@@ -92,7 +92,7 @@ struct QRCodeScannerExampleView: View {
 
 ## Scanning small QR codes
 
-Scanning small QR code on devices with dual or tripple cameras has to be adjusted because of minimum focus distance built in these cameras.
+Scanning small QR code on devices with dual or triple cameras has to be adjusted because of minimum focus distance built in these cameras.
 To have the best possible focus on the code we scan it is needed to choose the most suitable camera and apply recommended zoom factor.
 
 Example for scanning 20x20mm QR codes.
